@@ -1,0 +1,90 @@
+@use "mixins";
+
+:root {
+  font-size: 10px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.fw-400 {
+  font-weight: 400;
+}
+
+.fw-500 {
+  font-weight: 500;
+}
+
+.fw-700 {
+  font-weight: 700;
+}
+
+.__self-start {
+  align-self: flex-start;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.d-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.__align-center {
+  align-items: center;
+}
+
+.__justify-center {
+  justify-content: center;
+}
+.__justify-end {
+  justify-content: flex-end;
+}
+
+.__space-between {
+  justify-content: space-between;
+}
+
+.__column {
+  flex-direction: column;
+}
+
+.__wrap {
+  flex-wrap: wrap;
+}
+
+.no-shrink {
+  flex-shrink: 0;
+}
+
+.comforta {
+  font-family: "Comfortaa", sans-serif;
+}
+
+.roboto {
+  font-family: "Roboto", sans-serif;
+}
+
+.roboto-mono {
+  font-family: "Roboto Mono", monospace;
+}
+
+.visually-hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+
+  border: 0;
+
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+}
+

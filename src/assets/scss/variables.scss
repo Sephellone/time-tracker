@@ -1,0 +1,9 @@
+@use "mixins";
+
+:root {
+  --container-width: 600px;
+  --main-navigation-height: 72px;
+  @include mixins.desktop-up {
+    --main-navigation-height: 0px;
+  }
+}

@@ -1,0 +1,85 @@
+@use "sass:meta";
+@use "sass:list";
+
+$offset: 4;
+
+$classList: (
+  ma: margin,
+  my: margin-top margin-bottom,
+  mx: margin-left margin-right,
+  mt: margin-top,
+  mb: margin-bottom,
+  ml: margin-left,
+  mr: margin-right,
+  pa: padding,
+  py: padding-top padding-bottom,
+  px: padding-left padding-right,
+  pl: padding-left,
+  pr: padding-right,
+  pt: padding-top,
+  pb: padding-bottom,
+  gap: gap,
+);
+
+$classListNegative: (
+  ma: margin,
+  my: margin-top margin-bottom,
+  mx: margin-left margin-right,
+  mt: margin-top,
+  mb: margin-bottom,
+  ml: margin-left,
+  mr: margin-right,
+);
+
+// print rules.
+:root {
+  @for $i from 0 through 12 {
+    --sp-#{$i}: #{$offset * $i}px;
+    @if $i > 0 {
+      --sp-n#{$i}: -#{$offset * $i}px;
+    }
+    @if $i == 12 {
+      --sp-auto: auto;
+    }
+    @if $i == 0 {
+      --sp-05: #{$offset * 0.5}px;
+      --sp-n05: -#{$offset * 0.5}px;
+    }
+  }
+}
+#app {
+  @each $className, $properties in $classList {
+    @for $i from 0 through 12 {
+      @if meta.type-of($properties) == 'string' {
+        $properties: list.append((), $properties)
+      }
+      .#{$className}-#{$i} {
+        @for $k from 1 through list.length($properties) {
+          $property: list.nth($properties, $k);
+          #{$property}: #{$offset * $i}px;
+        }
+      }
+      @if $i == 12 {
+        .#{$className}-auto {
+          @for $k from 1 through list.length($properties) {
+            $property: list.nth($properties, $k);
+            #{$property}: auto;
+          }
+        }
+      }
+    }
+  }
+  @each $className, $properties in $classListNegative {
+    @for $i from 1 through 12 {
+      @if meta.type-of($properties) == 'string' {
+        $properties: list.append((), $properties)
+      }
+      .#{$className}-n#{$i} {
+        @for $k from 1 through list.length($properties) {
+          $property: list.nth($properties, $k);
+          #{$property}: -#{$offset * $i}px;
+        }
+      }
+    }
+  }
+}

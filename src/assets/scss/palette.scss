@@ -1,0 +1,31 @@
+:root {
+  --palette-bg: #edf3fb;
+  --palette-bg-secondary: #ffffff;
+  --palette-primary: #4541b6;
+  --palette-secondary: #dad9f0;
+  --palette-accent: #e64100;
+  --palette-fg: #04031a;
+  --palette-fg-secondary: #0f0e41;
+  --palette-positive: #049d50;
+  --palette-negative: #a80024;
+  --palette-gray: #7a7a87;
+  --shadow-color: rgba(4, 3, 26, 0.3);
+  --inner-shadow-color: rgba(4, 3, 26, 0.5);
+  --overlay-color: rgba(5, 4, 50, 0.5);
+}
+
+.dark {
+  --palette-bg: #141452;
+  --palette-bg-secondary: #04041d;
+  --palette-primary: #413bef;
+  --palette-secondary: #2b2973;
+  --palette-accent: #e64100;
+  --palette-fg: #bcc7f8;
+  --palette-fg-secondary: #ffffff;
+  --palette-positive: #049d50;
+  --palette-negative: #e3274f;
+  --palette-gray: #9292a5;
+  --shadow-color: rgba(148, 167, 244, 0.3);
+  --overlay-color: rgba(49, 47, 101, 0.5);
+  --inner-shadow-color: rgba(3, 0, 16, 0.5);
+}
