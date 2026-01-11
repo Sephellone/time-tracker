@@ -13,7 +13,7 @@ body {
   font-size: 14px;
   font-weight: 400;
   color: var(--palette-fg);
-  background-color: var(--palette-bg);
+  background-color: var(--palette-bg-secondary);
   display: flex;
   flex-direction: column;
 }

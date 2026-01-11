@@ -12,18 +12,8 @@
       <div class="projects-actions">
         <button @click="openCreateModal" class="btn btn-primary">+ Создать проект</button>
         <div class="filter-toggle">
-          <button
-            @click="showArchived = false"
-            class="filter-btn"
-            :class="{ active: !showArchived }">
-            Активные
-          </button>
-          <button
-            @click="showArchived = true"
-            class="filter-btn"
-            :class="{ active: showArchived }">
-            Архив
-          </button>
+          <button @click="showArchived = false" class="filter-btn" :class="{ active: !showArchived }">Активные</button>
+          <button @click="showArchived = true" class="filter-btn" :class="{ active: showArchived }">Архив</button>
         </div>
       </div>
 
@@ -37,7 +27,12 @@
       </div>
 
       <div v-else class="projects-grid">
-        <div v-for="project in filteredProjects" :key="project.id" class="project-card" :class="{ archived: project.archived }">
+        <div
+          v-for="project in filteredProjects"
+          :key="project.id"
+          class="project-card"
+          :class="{ archived: project.archived }"
+        >
           <div class="project-color-bar" :style="{ backgroundColor: project.color || '#667eea' }"></div>
           <div class="project-content">
             <div class="project-header">
@@ -54,7 +49,7 @@
               <div class="project-actions">
                 <button @click="openEditModal(project)" class="btn-edit">Редактировать</button>
                 <button @click="confirmArchiveToggle(project)" class="btn-archive">
-                  {{ project.archived ? 'Сделать активным' : 'В архив' }}
+                  {{ project.archived ? "Сделать активным" : "В архив" }}
                 </button>
               </div>
             </div>
@@ -66,7 +61,7 @@
     <div v-if="showCreateModal || showEditModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h2>{{ showEditModal ? 'Редактировать проект' : 'Создать проект' }}</h2>
+          <h2>{{ showEditModal ? "Редактировать проект" : "Создать проект" }}</h2>
           <button @click="closeModal" class="btn-close">×</button>
         </div>
 
@@ -140,7 +135,15 @@
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Отмена</button>
             <button type="submit" class="btn btn-primary" :disabled="createLoading">
-              {{ createLoading ? (showEditModal ? 'Сохранение...' : 'Создание...') : (showEditModal ? 'Сохранить' : 'Создать') }}
+              {{
+                createLoading
+                  ? showEditModal
+                    ? "Сохранение..."
+                    : "Создание..."
+                  : showEditModal
+                    ? "Сохранить"
+                    : "Создать"
+              }}
             </button>
           </div>
         </form>
@@ -150,16 +153,22 @@
     <div v-if="showArchiveConfirm" class="modal-overlay" @click="closeArchiveConfirm">
       <div class="modal-content confirm-modal" @click.stop>
         <div class="modal-header">
-          <h2>{{ archivingProject?.archived ? 'Сделать проект активным?' : 'Поместить проект в архив?' }}</h2>
+          <h2>{{ archivingProject?.archived ? "Сделать проект активным?" : "Поместить проект в архив?" }}</h2>
           <button @click="closeArchiveConfirm" class="btn-close">×</button>
         </div>
         <div class="modal-body">
-          <p>{{ archivingProject?.archived ? 'Проект "' + archivingProject?.name + '" станет активным и будет отображаться в основном списке.' : 'Проект "' + archivingProject?.name + '" будет помещен в архив.' }}</p>
+          <p>
+            {{
+              archivingProject?.archived
+                ? 'Проект "' + archivingProject?.name + '" станет активным и будет отображаться в основном списке.'
+                : 'Проект "' + archivingProject?.name + '" будет помещен в архив.'
+            }}
+          </p>
         </div>
         <div class="modal-actions">
           <button type="button" @click="closeArchiveConfirm" class="btn btn-secondary">Отмена</button>
           <button @click="handleArchiveToggle" class="btn btn-primary" :disabled="archiveLoading">
-            {{ archiveLoading ? 'Сохранение...' : 'Подтвердить' }}
+            {{ archiveLoading ? "Сохранение..." : "Подтвердить" }}
           </button>
         </div>
       </div>
@@ -171,7 +180,7 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useCurrentUser, useCollection } from "vuefire";
-import { collection, addDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, serverTimestamp, query, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
 
 const router = useRouter();
@@ -244,7 +253,7 @@ const { data: projects, pending: loading } = useCollection(projectsQuery);
 const filteredProjects = computed(() => {
   if (!projects.value) return [];
   return projects.value
-    .filter(p => showArchived.value ? p.archived : !p.archived)
+    .filter((p) => (showArchived.value ? p.archived : !p.archived))
     .sort((a, b) => {
       if (a.archived === b.archived) {
         const aTime = a.createTime?.toMillis?.() || 0;
@@ -311,6 +320,7 @@ const handleCreateProject = async () => {
       createTime: serverTimestamp(),
       archived: false,
       totalDuration: 0,
+      lastEntryDate: Timestamp.fromDate(new Date(0)),
     });
 
     closeCreateModal();
@@ -867,7 +877,9 @@ const formatDate = (timestamp: any) => {
 
 .color-option.selected {
   border-color: #333;
-  box-shadow: 0 0 0 2px white, 0 0 0 4px #333;
+  box-shadow:
+    0 0 0 2px white,
+    0 0 0 4px #333;
 }
 
 .color-option .checkmark {

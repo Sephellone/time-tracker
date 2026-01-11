@@ -13,7 +13,7 @@
   width: 100%;
   max-width: var(--container-width);
   flex-grow: 1;
-  background-color: var(--palette-bg-secondary);
+  background-color: var(--palette-bg);
   padding-bottom: calc(var(--main-navigation-height) + 24px);
 }
 </style>

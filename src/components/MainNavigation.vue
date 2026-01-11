@@ -86,7 +86,7 @@ emitter.on(EVENTS.MAIN_MENU_STATUS, (status: boolean) => {
   z-index: 10;
   display: flex;
 
-  background-color: var(--palette-bg);
+  background-color: var(--palette-bg-secondary);
   padding: 4px 24px;
   border-radius: 20px;
   box-shadow: 0 2px 10px var(--shadow-color);

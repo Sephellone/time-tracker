@@ -1,4 +1,5 @@
 <template>
+  <active-timer v-if="userStore.user" />
   <router-view />
   <main-navigation v-if="userStore.user" />
   <main-menu v-if="userStore.user" />
@@ -8,6 +9,7 @@ import MainNavigation from "@/components/MainNavigation.vue";
 import MainMenu from "@/components/MainMenu.vue";
 import { useUserStore } from "@/stores/user.ts";
 import { useDarkMode } from "@/stores/darkMode.ts";
+import ActiveTimer from "@/components/ActiveTimer.vue";
 
 const userStore = useUserStore();
 const darkModeStore = useDarkMode();

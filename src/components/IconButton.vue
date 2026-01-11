@@ -9,18 +9,15 @@
       __secondary: secondary,
       __accent: accent,
       __positive: positive,
+      __loading: loading,
     }"
     :style="`color: ${iconColor}`"
     @click="$emit('click')"
   >
-    <base-loader
-      v-if="loading"
-      :color="color"
-      :size="size"
-    />
-    <slot>
-      <mdicon :name="icon" :size="size" />
-    </slot>
+    <base-loader v-if="loading" :color="iconColor" :size="size" />
+    <div v-else class="d-center">
+      <slot />
+    </div>
   </component>
 </template>
 <script setup lang="ts">
@@ -31,8 +28,7 @@ import BaseLoader from "@/components/BaseLoader.vue";
 const props = defineProps({
   loading: { type: Boolean, default: false },
   to: { type: Object as PropType<RouteLocationRaw> },
-  icon: { type: String, required: true },
-  size: { type: [String, Number], default: 28 },
+  size: { type: [String, Number], default: 20 },
   color: { type: String },
   negative: { type: Boolean },
   primary: { type: Boolean },
@@ -81,21 +77,29 @@ const iconColor = computed(() =>
 
   &.__negative {
     background-color: var(--palette-negative);
+    color: var(--palette-white);
   }
 
   &.__positive {
     background-color: var(--palette-positive);
+    color: var(--palette-white);
   }
 
   &.__primary {
     background-color: var(--palette-primary);
+    color: var(--palette-white);
   }
 
   &.__secondary {
     background-color: var(--palette-secondary);
+    color: var(--palette-primary);
   }
   &.__accent {
     background-color: var(--palette-accent);
+    color: var(--palette-white);
+  }
+  &.__loading {
+    pointer-events: none;
   }
 }
 </style>

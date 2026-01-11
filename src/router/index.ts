@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import { getCurrentUser } from "vuefire";
 import { useUserStore } from "@/stores/user";
 import LoginView from "@/views/LoginView.vue";
-import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import ProjectsView from "@/views/ProjectsView.vue";
 import TimeEntriesView from "@/views/TimeEntriesView.vue";
@@ -10,25 +9,22 @@ import StoryBook from "@/views/StoryBook.vue";
 import PageLogout from "@/views/PageLogout.vue";
 import { auth } from "@/firebaseConfig.ts";
 import { signOut } from "firebase/auth";
+import PageDashboard from '@/views/PageDashboard/PageDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      redirect: "/dashboard",
+      name: "home",
+      component: PageDashboard,
+      meta: { requiresAuth: true },
     },
     {
       path: "/login",
       name: "login",
       component: LoginView,
       meta: { requiresGuest: true },
-    },
-    {
-      path: "/dashboard",
-      name: "dashboard",
-      component: DashboardView,
-      meta: { requiresAuth: true },
     },
     {
       path: "/profile",

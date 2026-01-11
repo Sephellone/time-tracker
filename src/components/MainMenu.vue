@@ -14,11 +14,7 @@
           <user />
           Настройки профиля
         </router-link>
-        <router-link
-          class="main-menu__link __logout d-flex __align-center pa-3 gap-2"
-          to="/logout"
-          @click="toggleMenu"
-        >
+        <router-link class="main-menu__link __logout d-flex __align-center pa-3 gap-2" to="/logout" @click="toggleMenu">
           <log-out />
           Выйти
         </router-link>
@@ -87,7 +83,7 @@ onBeforeUnmount(() => {
     @include mixins.desktop-up {
       left: 0;
       top: 0;
-      padding: 24px 24px 24px calc((100% - var(--container-width))/2 + 24px);
+      padding: 24px 24px 24px calc((100% - var(--container-width)) / 2 + 24px);
       border-radius: 0 20px 20px 0;
       transform: translateX(0);
     }
@@ -127,8 +123,13 @@ onBeforeUnmount(() => {
 .slide-enter-from,
 .slide-leave-to {
   .main-menu__content {
-    transform: translateX(-100%);
+    transform: translateX(-50%)  translateY(100%);
     opacity: 0;
+
+    @include mixins.desktop-up {
+      transform: translateX(-100%);
+      opacity: 1;
+    }
   }
 
   .main-menu__overlay {

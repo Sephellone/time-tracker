@@ -342,16 +342,10 @@ const stopTimer = async () => {
     const dateOnly = new Date(startDateTime);
     dateOnly.setHours(0, 0, 0, 0);
 
-    const timeEntriesRef = collection(
-      db,
-      "users",
-      user.value.uid,
-      "projects",
-      activeTimer.value.projectId,
-      "timeEntries"
-    );
+    const timeEntriesRef = collection(db, "users", user.value.uid, "timeEntries");
 
     await addDoc(timeEntriesRef, {
+      projectId: activeTimer.value.projectId,
       date: Timestamp.fromDate(dateOnly),
       startTime: startTime,
       endTime: endTime,
@@ -366,6 +360,7 @@ const stopTimer = async () => {
       const currentTotalDuration = projectDoc.data().totalDuration || 0;
       await updateDoc(projectRef, {
         totalDuration: currentTotalDuration + durationSeconds,
+        lastEntryDate: Timestamp.fromDate(dateOnly),
       });
     }
 
@@ -472,16 +467,10 @@ const handleCreateTimeEntry = async () => {
     const dateOnly = new Date(newTimeEntry.value.startDate);
     dateOnly.setHours(0, 0, 0, 0);
 
-    const timeEntriesRef = collection(
-      db,
-      "users",
-      user.value.uid,
-      "projects",
-      newTimeEntry.value.projectId,
-      "timeEntries"
-    );
+    const timeEntriesRef = collection(db, "users", user.value.uid, "timeEntries");
 
     await addDoc(timeEntriesRef, {
+      projectId: newTimeEntry.value.projectId,
       date: Timestamp.fromDate(dateOnly),
       startTime: Timestamp.fromDate(startDateTime),
       endTime: Timestamp.fromDate(endDateTime),
@@ -496,6 +485,7 @@ const handleCreateTimeEntry = async () => {
       const currentTotalDuration = projectDoc.data().totalDuration || 0;
       await updateDoc(projectRef, {
         totalDuration: currentTotalDuration + durationSeconds,
+        lastEntryDate: Timestamp.fromDate(dateOnly),
       });
     }
 

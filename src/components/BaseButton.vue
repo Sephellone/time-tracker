@@ -117,7 +117,7 @@ const color = computed(() =>
   &.__small {
     padding: 6px 12px;
     font-size: 14px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 400;
   }
 

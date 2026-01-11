@@ -56,9 +56,7 @@
           <div v-if="loadingMore" class="loading-more">Загрузка...</div>
         </div>
 
-        <div v-if="!hasMore && entries.length > 0" class="end-message">
-          Все записи загружены
-        </div>
+        <div v-if="!hasMore && entries.length > 0" class="end-message">Все записи загружены</div>
       </div>
     </main>
 
@@ -80,44 +78,24 @@
           <div class="form-row">
             <div class="form-group">
               <label for="editStartDate">Дата начала *</label>
-              <input
-                id="editStartDate"
-                v-model="editingEntry.startDate"
-                type="date"
-                required
-              />
+              <input id="editStartDate" v-model="editingEntry.startDate" type="date" required />
             </div>
 
             <div class="form-group">
               <label for="editStartTime">Время начала *</label>
-              <input
-                id="editStartTime"
-                v-model="editingEntry.startTime"
-                type="time"
-                required
-              />
+              <input id="editStartTime" v-model="editingEntry.startTime" type="time" required />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="editEndDate">Дата окончания *</label>
-              <input
-                id="editEndDate"
-                v-model="editingEntry.endDate"
-                type="date"
-                required
-              />
+              <input id="editEndDate" v-model="editingEntry.endDate" type="date" required />
             </div>
 
             <div class="form-group">
               <label for="editEndTime">Время окончания *</label>
-              <input
-                id="editEndTime"
-                v-model="editingEntry.endTime"
-                type="time"
-                required
-              />
+              <input id="editEndTime" v-model="editingEntry.endTime" type="time" required />
             </div>
           </div>
 
@@ -128,7 +106,7 @@
           <div class="modal-actions">
             <button type="button" @click="closeEditModal" class="btn btn-secondary">Отмена</button>
             <button type="submit" class="btn btn-primary" :disabled="editLoading">
-              {{ editLoading ? 'Сохранение...' : 'Сохранить' }}
+              {{ editLoading ? "Сохранение..." : "Сохранить" }}
             </button>
           </div>
         </form>
@@ -147,7 +125,7 @@
         <div class="modal-actions">
           <button type="button" @click="closeDeleteConfirm" class="btn btn-secondary">Отмена</button>
           <button @click="handleDeleteEntry" class="btn btn-danger" :disabled="deleteLoading">
-            {{ deleteLoading ? 'Удаление...' : 'Удалить' }}
+            {{ deleteLoading ? "Удаление..." : "Удалить" }}
           </button>
         </div>
       </div>
@@ -156,26 +134,50 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useCurrentUser } from "vuefire";
 import { db } from "@/firebaseConfig";
-import { collection, query, orderBy, limit, startAfter, getDocs, doc, getDoc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  Timestamp,
+  DocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
+import type { TimeEntry } from "@/types.ts";
+
+
+interface EditingEntry {
+  id: string;
+  projectId: string;
+  projectName: string;
+  startDate: string;
+  startTime: string;
+  endDate: string;
+  endTime: string;
+}
 
 const router = useRouter();
 const user = useCurrentUser();
 
-const entries = ref<any[]>([]);
+const entries = ref<TimeEntry[]>([]);
 const loading = ref(true);
 const loadingMore = ref(false);
 const hasMore = ref(true);
-const lastDoc = ref<any>(null);
+const lastDoc = ref<DocumentSnapshot<DocumentData> | null>(null);
 const loadMoreTrigger = ref<HTMLElement | null>(null);
 
 const showEditModal = ref(false);
 const editLoading = ref(false);
 const editError = ref("");
-const editingEntry = ref<any>({
+const editingEntry = ref<EditingEntry>({
   id: "",
   projectId: "",
   projectName: "",
@@ -187,7 +189,7 @@ const editingEntry = ref<any>({
 
 const showDeleteConfirm = ref(false);
 const deleteLoading = ref(false);
-const deletingEntry = ref<any>(null);
+const deletingEntry = ref<TimeEntry | null>(null);
 
 const PAGE_SIZE = 20;
 
@@ -195,9 +197,10 @@ const goBack = () => {
   router.push("/dashboard");
 };
 
-const formatDate = (timestamp: any) => {
+const formatDate = (timestamp: Timestamp | Date | null | undefined) => {
   if (!timestamp) return "Неизвестно";
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const date =
+    timestamp instanceof Timestamp ? timestamp.toDate() : timestamp instanceof Date ? timestamp : new Date(timestamp);
   return date.toLocaleDateString("ru-RU", {
     year: "numeric",
     month: "long",
@@ -205,9 +208,10 @@ const formatDate = (timestamp: any) => {
   });
 };
 
-const formatTime = (timestamp: any) => {
+const formatTime = (timestamp: Timestamp | Date | null | undefined) => {
   if (!timestamp) return "";
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const date =
+    timestamp instanceof Timestamp ? timestamp.toDate() : timestamp instanceof Date ? timestamp : new Date(timestamp);
   return date.toLocaleTimeString("ru-RU", {
     hour: "2-digit",
     minute: "2-digit",
@@ -218,13 +222,13 @@ const formatDuration = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
 const loadTimeEntries = async (isLoadMore = false) => {
   if (!user.value?.uid) return;
-  
+
   if (isLoadMore) {
     loadingMore.value = true;
   } else {
@@ -232,65 +236,59 @@ const loadTimeEntries = async (isLoadMore = false) => {
   }
 
   try {
+    // Получаем все проекты для обогащения данных
     const projectsRef = collection(db, "users", user.value.uid, "projects");
     const projectsSnapshot = await getDocs(projectsRef);
-    
+
     const projectsMap = new Map();
-    projectsSnapshot.forEach(doc => {
+    projectsSnapshot.forEach((doc) => {
       projectsMap.set(doc.id, doc.data());
     });
 
-    const allEntries: any[] = [];
-    
-    for (const [projectId, projectData] of projectsMap.entries()) {
-      const timeEntriesRef = collection(db, "users", user.value.uid, "projects", projectId, "timeEntries");
-      let q = query(timeEntriesRef, orderBy("date", "desc"), orderBy("startTime", "desc"));
-      
-      const snapshot = await getDocs(q);
-      
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const duration = data.duration || 0;
-        let cost = null;
-        
-        if (projectData.hourlyRate && projectData.currency) {
-          cost = (duration / 3600) * projectData.hourlyRate;
-        }
-        
-        allEntries.push({
-          id: doc.id,
-          projectId,
-          projectName: projectData.name,
-          projectColor: projectData.color,
-          currency: projectData.currency,
-          ...data,
-          cost,
-        });
-      });
-    }
+    // Получаем все записи времени одним запросом
+    const timeEntriesRef = collection(db, "users", user.value.uid, "timeEntries");
+    const q = query(timeEntriesRef, orderBy("date", "desc"), orderBy("startTime", "desc"));
+    const snapshot = await getDocs(q);
 
-    allEntries.sort((a, b) => {
-      const aDate = a.date?.toMillis?.() || 0;
-      const bDate = b.date?.toMillis?.() || 0;
-      if (aDate !== bDate) return bDate - aDate;
-      
-      const aStart = a.startTime?.toMillis?.() || 0;
-      const bStart = b.startTime?.toMillis?.() || 0;
-      return bStart - aStart;
+    const allEntries: TimeEntry[] = [];
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const projectId = data.projectId;
+      const projectData = projectsMap.get(projectId);
+
+      if (!projectData) return; // Пропускаем записи удаленных проектов
+
+      const duration = data.duration || 0;
+      let cost = null;
+
+      if (projectData.hourlyRate && projectData.currency) {
+        cost = (duration / 3600) * projectData.hourlyRate;
+      }
+
+      allEntries.push({
+        id: doc.id,
+        projectId,
+        projectName: projectData.name,
+        projectColor: projectData.color,
+        currency: projectData.currency,
+        ...data,
+        cost,
+      });
     });
 
+    // Сортировка уже выполнена в запросе, но на всякий случай оставим
     const startIndex = isLoadMore ? entries.value.length : 0;
     const endIndex = startIndex + PAGE_SIZE;
     const newEntries = allEntries.slice(startIndex, endIndex);
-    
+
     if (isLoadMore) {
       entries.value.push(...newEntries);
     } else {
       entries.value = newEntries;
     }
-    
+
     hasMore.value = endIndex < allEntries.length;
-    
   } catch (error) {
     console.error("Error loading time entries:", error);
   } finally {
@@ -301,10 +299,10 @@ const loadTimeEntries = async (isLoadMore = false) => {
 
 const handleScroll = () => {
   if (!loadMoreTrigger.value || loadingMore.value || !hasMore.value) return;
-  
+
   const rect = loadMoreTrigger.value.getBoundingClientRect();
   const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
-  
+
   if (isVisible) {
     loadTimeEntries(true);
   }
@@ -312,23 +310,23 @@ const handleScroll = () => {
 
 onMounted(() => {
   loadTimeEntries();
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener("scroll", handleScroll);
 });
 
-const openEditModal = (entry: any) => {
-  const startDateTime = entry.startTime?.toDate?.() || new Date();
-  const endDateTime = entry.endTime?.toDate?.() || new Date();
-  
+const openEditModal = (entry: TimeEntry) => {
+  const startDateTime = entry.startTime instanceof Timestamp ? entry.startTime.toDate() : new Date();
+  const endDateTime = entry.endTime instanceof Timestamp ? entry.endTime.toDate() : new Date();
+
   editingEntry.value = {
     id: entry.id,
     projectId: entry.projectId,
     projectName: entry.projectName,
-    startDate: startDateTime.toISOString().split('T')[0],
+    startDate: startDateTime.toISOString().split("T")[0],
     startTime: startDateTime.toTimeString().slice(0, 5),
-    endDate: endDateTime.toISOString().split('T')[0],
+    endDate: endDateTime.toISOString().split("T")[0],
     endTime: endDateTime.toTimeString().slice(0, 5),
   };
-  
+
   showEditModal.value = true;
   editError.value = "";
 };
@@ -368,18 +366,10 @@ const handleUpdateEntry = async () => {
     const dateOnly = new Date(editingEntry.value.startDate);
     dateOnly.setHours(0, 0, 0, 0);
 
-    const entryRef = doc(
-      db,
-      "users",
-      user.value.uid,
-      "projects",
-      editingEntry.value.projectId,
-      "timeEntries",
-      editingEntry.value.id
-    );
+    const entryRef = doc(db, "users", user.value.uid, "timeEntries", editingEntry.value.id);
 
     const oldEntryDoc = await getDoc(entryRef);
-    const oldDuration = oldEntryDoc.exists() ? (oldEntryDoc.data().duration || 0) : 0;
+    const oldDuration = oldEntryDoc.exists() ? oldEntryDoc.data().duration || 0 : 0;
 
     await updateDoc(entryRef, {
       date: Timestamp.fromDate(dateOnly),
@@ -401,16 +391,16 @@ const handleUpdateEntry = async () => {
     const updatedEntryDoc = await getDoc(entryRef);
     if (updatedEntryDoc.exists()) {
       const updatedData = updatedEntryDoc.data();
-      const entryIndex = entries.value.findIndex(e => e.id === editingEntry.value.id && e.projectId === editingEntry.value.projectId);
-      
+      const entryIndex = entries.value.findIndex((e) => e.id === editingEntry.value.id);
+
       if (entryIndex !== -1) {
         const projectData = entries.value[entryIndex];
         let cost = null;
-        
+
         if (projectData.currency && projectData.hourlyRate) {
           cost = (durationSeconds / 3600) * projectData.hourlyRate;
         }
-        
+
         entries.value[entryIndex] = {
           ...entries.value[entryIndex],
           ...updatedData,
@@ -420,14 +410,14 @@ const handleUpdateEntry = async () => {
     }
 
     closeEditModal();
-  } catch (err: any) {
-    editError.value = err.message || "Произошла ошибка при обновлении записи";
+  } catch (err) {
+    editError.value = err instanceof Error ? err.message : "Произошла ошибка при обновлении записи";
   } finally {
     editLoading.value = false;
   }
 };
 
-const confirmDelete = (entry: any) => {
+const confirmDelete = (entry: TimeEntry) => {
   deletingEntry.value = entry;
   showDeleteConfirm.value = true;
 };
@@ -440,25 +430,17 @@ const closeDeleteConfirm = () => {
 
 const handleDeleteEntry = async () => {
   if (!user.value?.uid || !deletingEntry.value) return;
-  
+
   deleteLoading.value = true;
-  
+
   try {
-    const entryRef = doc(
-      db,
-      "users",
-      user.value.uid,
-      "projects",
-      deletingEntry.value.projectId,
-      "timeEntries",
-      deletingEntry.value.id
-    );
-    
+    const entryRef = doc(db, "users", user.value.uid, "timeEntries", deletingEntry.value.id);
+
     const entryDoc = await getDoc(entryRef);
-    const entryDuration = entryDoc.exists() ? (entryDoc.data().duration || 0) : 0;
-    
+    const entryDuration = entryDoc.exists() ? entryDoc.data().duration || 0 : 0;
+
     await deleteDoc(entryRef);
-    
+
     const projectRef = doc(db, "users", user.value.uid, "projects", deletingEntry.value.projectId);
     const projectDoc = await getDoc(projectRef);
     if (projectDoc.exists()) {
@@ -467,17 +449,15 @@ const handleDeleteEntry = async () => {
         totalDuration: Math.max(0, currentTotalDuration - entryDuration),
       });
     }
-    
-    const entryIndex = entries.value.findIndex(
-      e => e.id === deletingEntry.value.id && e.projectId === deletingEntry.value.projectId
-    );
-    
+
+    const entryIndex = entries.value.findIndex((e) => e.id === deletingEntry.value.id);
+
     if (entryIndex !== -1) {
       entries.value.splice(entryIndex, 1);
     }
-    
+
     closeDeleteConfirm();
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error deleting entry:", err);
     alert("Произошла ошибка при удалении записи");
   } finally {
@@ -486,7 +466,7 @@ const handleDeleteEntry = async () => {
 };
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
 });
 </script>
 
@@ -585,7 +565,9 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .entry-card:hover {

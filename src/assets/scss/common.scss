@@ -21,6 +21,10 @@ a {
   font-weight: 700;
 }
 
+.subtitle {
+  font-size: 16px;
+}
+
 .__self-start {
   align-self: flex-start;
 }
@@ -60,6 +64,10 @@ a {
 
 .no-shrink {
   flex-shrink: 0;
+}
+
+.flex-grow {
+  flex-grow: 1;
 }
 
 .comforta {
