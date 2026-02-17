@@ -17,11 +17,7 @@
     }"
     @click="$emit('click')"
   >
-    <base-loader
-      v-if="loading"
-      :color="color"
-      :size="spinnerSize ? spinnerSize : small ? '14px' : '20px'"
-    />
+    <base-loader v-if="loading" :color="color" :size="spinnerSize ? spinnerSize : small ? '14px' : '20px'" />
     <slot v-else />
   </component>
 </template>
@@ -66,7 +62,7 @@ const color = computed(() =>
   background-color: var(--palette-primary);
   color: #ffffff;
   border-radius: 12px;
-  border: none;
+  border: 1px solid var(--palette-primary);
   outline: none;
   box-shadow: none;
   font-size: 16px;
@@ -98,14 +94,17 @@ const color = computed(() =>
 
   &.__negative {
     background-color: var(--palette-negative);
+    border-color: var(--palette-negative);
   }
 
   &.__positive {
     background-color: var(--palette-positive);
+    border-color: var(--palette-positive);
   }
 
   &.__accent {
     background-color: var(--palette-accent);
+    border-color: var(--palette-accent);
   }
 
   &.__large {

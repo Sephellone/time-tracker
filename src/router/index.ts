@@ -3,13 +3,13 @@ import { getCurrentUser } from "vuefire";
 import { useUserStore } from "@/stores/user";
 import LoginView from "@/views/LoginView.vue";
 import ProfileView from "@/views/ProfileView.vue";
-import ProjectsView from "@/views/ProjectsView.vue";
-import TimeEntriesView from "@/views/TimeEntriesView.vue";
 import StoryBook from "@/views/StoryBook.vue";
 import PageLogout from "@/views/PageLogout.vue";
 import { auth } from "@/firebaseConfig.ts";
 import { signOut } from "firebase/auth";
 import PageDashboard from '@/views/PageDashboard/PageDashboard.vue'
+import PageProjects from "@/views/PageProjects/PageProjects.vue";
+import PageEntries from "@/views/PageEntries/PageEntries.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,13 +35,13 @@ const router = createRouter({
     {
       path: "/projects",
       name: "projects",
-      component: ProjectsView,
+      component: PageProjects,
       meta: { requiresAuth: true },
     },
     {
       path: "/time-entries",
       name: "timeEntries",
-      component: TimeEntriesView,
+      component: PageEntries,
       meta: { requiresAuth: true },
     },
     {

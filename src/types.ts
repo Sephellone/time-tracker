@@ -1,4 +1,5 @@
 import type { Timestamp } from "firebase/firestore";
+import type { RouteLocationRaw } from "vue-router";
 
 export interface NavigationItem {
   name: string;
@@ -6,6 +7,14 @@ export interface NavigationItem {
   to?: string;
   onClick?: () => void;
   iconComponent?: any;
+}
+
+export interface InputProjectCreate {
+  name: string;
+  description?: string;
+  color: string;
+  hourlyRate: number;
+  currency?: string;
 }
 
 export interface Project {
@@ -52,4 +61,27 @@ export interface TimerDb {
 export interface StartTimerEvent {
   projectId: string;
   cb?: () => void;
+}
+export interface SelectOption {
+  value: string;
+  text: string;
+}
+
+export interface FormField {
+  name: string;
+  label?: string;
+  type: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  class?: string;
+  options?: SelectOption[];
+}
+
+export type FormValues = Record<string, any>;
+
+export interface TabItem {
+  name: string;
+  text: string;
+  to?: RouteLocationRaw | string;
 }

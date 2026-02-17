@@ -2,15 +2,17 @@
   <div class="recent-entries-block">
     <div class="recent-entries-block__header d-flex __align-center __space-between">
       <h2 class="comforta fw-400">Последние записи</h2>
-      <base-button class="recent-entries-block__all no-shrink" secondary to="/entries">Показать все →</base-button>
+      <base-button class="recent-entries-block__all no-shrink" secondary :to="{ name: 'timeEntries' }">
+        Показать все →
+      </base-button>
     </div>
     <div class="d-center">
       <base-loader v-if="loading" class="mt-5" />
       <div v-else-if="timeEntries.length === 0" class="d-flex __align-center __column gap-2 pa-10">
         <div class="recent-entries-block__empty mb-3">Пока нет записей</div>
       </div>
-      <div v-else class="recent-entries-block__list d-flex __column __space-between gap-3 py-4">
-        <!--        <recent-project-item v-for="project in timeEntries" :key="project.id" :project="project" />-->
+      <div v-else class="recent-entries-block__list flex-grow d-flex __column __space-between gap-3 py-4">
+        <recent-entry-item v-for="entry in timeEntries" :key="entry.id" :entry="entry" />
       </div>
     </div>
   </div>
@@ -19,10 +21,11 @@
 import BaseButton from "@/components/BaseButton.vue";
 import { ref } from "vue";
 import type { Project, TimeEntry, TimeEntryDb } from "@/types.ts";
-import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore";
+import { collection, getDocs, limit, orderBy, query, where, documentId } from "firebase/firestore";
 import { db } from "@/firebaseConfig.ts";
 import { useUserStore } from "@/stores/user.ts";
 import BaseLoader from "@/components/BaseLoader.vue";
+import RecentEntryItem from "@/components/RecentEntryItem.vue";
 
 const userStore = useUserStore();
 
@@ -45,8 +48,9 @@ const getTimeEntries = async () => {
     const projectIds = entries.docs.map((doc) => doc.data().projectId);
 
     const projectsRef = collection(db, "users", userStore.user.uid, "projects");
-    const projectsQ = query(projectsRef, where("id", "in", projectIds));
+    const projectsQ = query(projectsRef, where(documentId(), "in", projectIds));
     const projectsSnapshot = await getDocs(projectsQ);
+
     const projects = projectsSnapshot.docs.reduce(
       (acc, doc) => {
         acc[doc.id] = doc.data() as Project;

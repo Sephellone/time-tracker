@@ -1,16 +1,16 @@
 <template>
-  <div class="recent-project-item" :style="{ '--color': project.color }">
+  <div class="recent-project-item d-flex __column" :style="{ '--color': project.color }">
     <div class="recent-project-item__name comforta mb-3">{{ project.name }}</div>
     <div class="recent-project-item__time d-flex __column gap-1 mb-3">
       <span class="recent-project-item__subtitle">Общее время:</span>
-      <span class="recent-project-item__data">{{ project.totalDuration }}</span>
+      <span class="recent-project-item__data">{{ formatElapsedTime(project.totalDuration) }}</span>
     </div>
     <div class="recent-project-item__time d-flex __column gap-1 mb-5">
       <span class="recent-project-item__subtitle">Последняя запись:</span>
       <span class="recent-project-item__data">{{ lastDate }}</span>
     </div>
     <base-button
-      class="recent-project-item__start"
+      class="recent-project-item__start mt-auto"
       :disabled="!!timerStore.activeTimer"
       :loading="loading"
       spinner-size="24px"
@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { computed, type PropType, ref } from "vue";
 import type { Project } from "@/types.ts";
-import { formatDate } from "@/lib/time.ts";
+import { formatDate, formatElapsedTime } from "@/lib/time.ts";
 import { Play } from "lucide-vue-next";
 import BaseButton from "@/components/BaseButton.vue";
 import emitter from "@/lib/emitter.ts";
@@ -46,7 +46,7 @@ const lastDate = computed(() => {
 
 const onClick = () => {
   loading.value = true;
-  emitter.emit(EVENTS.START_TIMER, {projectId: props.project.id, cb: () => loading.value = false});
+  emitter.emit(EVENTS.START_TIMER, { projectId: props.project.id, cb: () => (loading.value = false) });
 };
 </script>
 

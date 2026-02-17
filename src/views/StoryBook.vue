@@ -11,22 +11,41 @@
     <base-button secondary loading>I'm secondary button</base-button>
     <base-button negative>I'm negative button</base-button>
     <base-button positive>I'm positive button</base-button>
-    <base-button accent>I'm accent button</base-button>
+    <base-button accent @click="modalOpen = true">I'm accent button. I'll open modal</base-button>
 
     <div class="d-flex __wrap">
-      <icon-button icon="pencil" />
-      <icon-button primary icon="pencil" />
-      <icon-button negative icon="pencil" />
-      <icon-button positive icon="pencil" />
-      <icon-button secondary icon="pencil" />
-      <icon-button accent icon="pencil" />
-      <icon-button primary icon="pencil" size="16px" />
-      <icon-button primary icon="pencil" size="32px" />
+      <icon-button>
+        <pencil />
+      </icon-button>
+      <icon-button primary>
+        <pencil />
+      </icon-button>
+      <icon-button negative>
+        <pencil />
+      </icon-button>
+      <icon-button positive>
+        <pencil />
+      </icon-button>
+      <icon-button secondary>
+        <pencil />
+      </icon-button>
+      <icon-button accent>
+        <pencil />
+      </icon-button>
+      <icon-button primary>
+        <pencil :size="16" />
+      </icon-button>
+      <icon-button primary>
+        <x :size="32" />
+      </icon-button>
     </div>
 
     <div>
       <base-switch v-model="switchOn" />
     </div>
+    <base-modal :value="modalOpen" title="Modal title" @close="modalOpen = false">
+      <div>Modal content</div>
+    </base-modal>
   </base-page>
 </template>
 <script setup lang="ts">
@@ -35,10 +54,11 @@ import IconButton from "@/components/IconButton.vue";
 import BasePage from "@/components/BasePage.vue";
 import BaseSwitch from "@/components/BaseSwitch.vue";
 import { ref } from "vue";
+import { Pencil, X } from "lucide-vue-next";
+import BaseModal from "@/components/BaseModal.vue";
 
 const switchOn = ref(false);
+const modalOpen = ref(false);
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

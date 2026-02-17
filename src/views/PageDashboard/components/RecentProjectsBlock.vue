@@ -2,20 +2,22 @@
   <div class="recent-projects-block">
     <div class="recent-projects-block__header d-flex __align-center __space-between">
       <h2 class="comforta fw-400">Недавние проекты</h2>
-      <base-button class="recent-projects-block__all no-shrink" secondary to="/projects">К проектам →</base-button>
+      <base-button class="recent-projects-block__all no-shrink" secondary :to="{ name: 'projects' }">
+        К проектам →
+      </base-button>
     </div>
     <div class="d-center">
       <base-loader v-if="loading" class="mt-5" />
       <div v-else-if="projects.length === 0" class="d-flex __align-center __column gap-2 pa-10">
         <div class="recent-projects-block__empty mb-3">Пока у вас нет проектов</div>
-        <base-button class="recent-projects-block__new">
+        <base-button class="recent-projects-block__new" @click="onNewProjectClick">
           <circle-plus class="mr-2" />
           Создать проект
         </base-button>
       </div>
       <div class="recent-projects-block__list d-flex flex-grow __space-between gap-3 px-2 py-4" v-else>
         <recent-project-item v-for="project in projects" :key="project.id" :project="project" />
-        <div v-if="projects.length < 3" class="recent-projects-block__add-reminder d-center">
+        <div v-if="projects.length < 3" class="recent-projects-block__add-reminder d-center" @click="onNewProjectClick">
           <circle-plus :size="52" />
         </div>
       </div>
@@ -24,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import type { Project } from "@/types.ts";
-import { ref } from "vue";
+import { onBeforeUnmount, ref } from "vue";
 import { useUserStore } from "@/stores/user.ts";
 import { db } from "@/firebaseConfig";
 import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
@@ -32,6 +34,8 @@ import RecentProjectItem from "@/components/RecentProjectItem.vue";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseLoader from "@/components/BaseLoader.vue";
 import { CirclePlus } from "lucide-vue-next";
+import emitter from "@/lib/emitter.ts";
+import { EVENTS } from "@/const.ts";
 
 const userStore = useUserStore();
 const loading = ref(false);
@@ -52,7 +56,6 @@ const loadRecentProjects = async () => {
     );
 
     const snapshot = await getDocs(q);
-    console.log(snapshot);
     projects.value = snapshot.docs.map((doc) => {
       const data = doc.data();
       return {
@@ -75,7 +78,21 @@ const loadRecentProjects = async () => {
   }
 };
 
+const onNewProject = (project: Project) => {
+  projects.value.push(project);
+};
+
+emitter.on(EVENTS.PROJECT_CREATED, onNewProject);
+
+const onNewProjectClick = () => {
+  emitter.emit(EVENTS.OPEN_EDIT_PROJECT_MODAL, null);
+};
+
 loadRecentProjects();
+
+onBeforeUnmount(() => {
+  emitter.off(EVENTS.PROJECT_CREATED, onNewProject);
+});
 </script>
 
 <style scoped lang="scss">
