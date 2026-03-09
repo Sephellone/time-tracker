@@ -54,7 +54,7 @@ const navigationList: NavigationItem[] = [
   {
     name: "stats",
     text: "Статистика",
-    to: "/",
+    to: "/statistics",
     iconComponent: ChartPie,
   },
 

@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-width: var(--container-width);
+    max-width: max(var(--container-width), 50vw);
     background-color: var(--palette-bg-secondary);
     padding: 24px 24px calc(var(--main-navigation-height) + 24px) 24px;
     border-radius: 20px 20px 0 0;

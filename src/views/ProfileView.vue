@@ -1,134 +1,82 @@
 <template>
-  <div class="profile">
-    <header class="profile-header">
-      <div class="header-content">
-        <button @click="goBack" class="btn-back">← Назад</button>
-        <h1>Профиль</h1>
-        <div></div>
+  <base-page class="profile px-5">
+    <page-title class="pt-4 mb-6" title="Профиль" />
+
+    <div class="profile__card d-flex __column __align-center pa-5 gap-4 mb-6">
+      <div class="profile__avatar d-center">
+        {{ displayName.charAt(0).toUpperCase() }}
       </div>
-    </header>
-
-    <main class="profile-main">
-      <div class="profile-card">
-        <div class="profile-info">
-          <div class="avatar">
-            {{ displayName.charAt(0).toUpperCase() }}
-          </div>
-          <h2>{{ displayName }}</h2>
-          <p class="email">{{ user?.email }}</p>
-          <div class="user-id-section">
-            <label>ID пользователя</label>
-            <div class="user-id-container">
-              <code class="user-id">{{ user?.uid }}</code>
-              <button @click="copyUserId" class="btn-copy" :class="{ copied: isCopied }">
-                {{ isCopied ? "✓ Скопировано" : "Копировать" }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>Изменить отображаемое имя</h3>
-          <form @submit.prevent="handleUpdateDisplayName" class="profile-form">
-            <div class="form-group">
-              <label for="displayName">Отображаемое имя</label>
-              <input
-                id="displayName"
-                v-model="newDisplayName"
-                type="text"
-                required
-                placeholder="Введите новое имя"
-              />
-            </div>
-
-            <div v-if="displayNameError" class="error-message">
-              {{ displayNameError }}
-            </div>
-
-            <div v-if="displayNameSuccess" class="success-message">
-              {{ displayNameSuccess }}
-            </div>
-
-            <button type="submit" class="btn btn-primary" :disabled="displayNameLoading">
-              {{ displayNameLoading ? "Сохранение..." : "Сохранить имя" }}
-            </button>
-          </form>
-        </div>
-
-        <div class="form-section">
-          <h3>Изменить пароль</h3>
-          <form @submit.prevent="handleUpdatePassword" class="profile-form">
-            <div class="form-group">
-              <label for="currentPassword">Текущий пароль</label>
-              <input
-                id="currentPassword"
-                v-model="currentPassword"
-                type="password"
-                required
-                placeholder="Введите текущий пароль"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="newPassword">Новый пароль</label>
-              <input
-                id="newPassword"
-                v-model="newPassword"
-                type="password"
-                required
-                minlength="6"
-                placeholder="Минимум 6 символов"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPassword">Подтвердите новый пароль</label>
-              <input
-                id="confirmPassword"
-                v-model="confirmPassword"
-                type="password"
-                required
-                minlength="6"
-                placeholder="Повторите новый пароль"
-              />
-            </div>
-
-            <div v-if="passwordError" class="error-message">
-              {{ passwordError }}
-            </div>
-
-            <div v-if="passwordSuccess" class="success-message">
-              {{ passwordSuccess }}
-            </div>
-
-            <button type="submit" class="btn btn-primary" :disabled="passwordLoading">
-              {{ passwordLoading ? "Изменение..." : "Изменить пароль" }}
-            </button>
-          </form>
+      <div class="profile__info d-center __column gap-1">
+        <div class="profile__name">{{ displayName }}</div>
+        <p class="profile__email">{{ user?.email }}</p>
+      </div>
+      <div class="profile__user-id d-center __column gap-1">
+        <div class="profile__id-label">ID пользователя</div>
+        <div class="profile__user-id-container d-flex __align-center py-2 px-3" @click="copyUserId">
+          <code class="profile__id mr-2">{{ user?.uid }}</code>
+          <check v-if="isCopied" :size="16" color="var(--palette-positive)" />
+          <copy v-else :size="16" color="var(--palette-primary)" />
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+
+    <div class="profile__form d-flex __column gap-4 mb-6">
+      <div class="profile__form-title comforta">Изменить имя</div>
+      <base-input class="profile__name-field" name="displayName" v-model="newDisplayName" label="Имя" />
+      <div v-if="displayNameError" class="error-message">
+        {{ displayNameError }}
+      </div>
+      <div v-if="displayNameSuccess" class="success-message">
+        {{ displayNameSuccess }}
+      </div>
+      <base-button class="profile__form-button" :loading="displayNameLoading" @click="handleUpdateDisplayName">
+        Сохранить
+      </base-button>
+    </div>
+
+    <div class="profile__form d-flex __column gap-4">
+      <div class="profile__form-title comforta">Изменить пароль</div>
+      <base-form
+        class="profile__password d-flex __column gap-3"
+        :fields="passwordFormFields"
+        :values="passwordFormValues"
+        :errorFields="passwordErrorFields"
+        @input="onPasswordInput"
+      />
+      <div v-if="passwordError" class="error-message">
+        {{ passwordError }}
+      </div>
+      <div v-if="passwordSuccess" class="success-message">
+        {{ passwordSuccess }}
+      </div>
+      <base-button class="profile__form-button" :loading="passwordLoading" @click="handleUpdatePassword">
+        Изменить пароль
+      </base-button>
+    </div>
+  </base-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { Copy, Check } from "lucide-vue-next";
 import { useCurrentUser } from "vuefire";
-import {
-  updateProfile,
-  updatePassword,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-} from "firebase/auth";
+import { updateProfile, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "@/firebaseConfig";
+import { db } from "@/firebaseConfig";
+import BasePage from "@/components/BasePage.vue";
+import PageTitle from "@/components/PageTitle.vue";
+import { useUserStore } from "@/stores/user.ts";
+import BaseInput from "@/components/BaseInput.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import BaseForm from "@/components/BaseForm.vue";
+import type { FormField, FormValues } from "@/types.ts";
 
-const router = useRouter();
 const user = useCurrentUser();
 
+const userStore = useUserStore();
+
 const displayName = computed(() => {
-  return user.value?.displayName || user.value?.email?.split("@")[0] || "Пользователь";
+  return userStore.user?.displayName || userStore.user?.email?.split("@")[0] || "Пользователь";
 });
 
 const newDisplayName = ref("");
@@ -136,12 +84,45 @@ const displayNameError = ref("");
 const displayNameSuccess = ref("");
 const displayNameLoading = ref(false);
 
-const currentPassword = ref("");
-const newPassword = ref("");
-const confirmPassword = ref("");
+const passwordFormValues = ref<FormValues>({
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
+
+const passwordFormFields = computed<FormField[]>(() => [
+  {
+    name: "currentPassword",
+    label: "Текущий пароль",
+    type: "password",
+    required: true,
+    placeholder: "Введите текущий пароль",
+  },
+  {
+    name: "newPassword",
+    label: "Новый пароль",
+    type: "password",
+    required: true,
+    placeholder: "Минимум 6 символов",
+  },
+  {
+    name: "confirmPassword",
+    label: "Подтвердите новый пароль",
+    type: "password",
+    required: true,
+    placeholder: "Повторите новый пароль",
+  },
+]);
+
+const passwordErrorFields = ref<string[]>([]);
 const passwordError = ref("");
 const passwordSuccess = ref("");
 const passwordLoading = ref(false);
+
+const onPasswordInput = (values: FormValues) => {
+  passwordFormValues.value = values;
+  passwordErrorFields.value = [];
+};
 
 const isCopied = ref(false);
 
@@ -149,15 +130,11 @@ onMounted(() => {
   newDisplayName.value = displayName.value;
 });
 
-const goBack = () => {
-  router.push("/dashboard");
-};
-
 const copyUserId = async () => {
-  if (!user.value?.uid) return;
+  if (!userStore.user) return;
 
   try {
-    await navigator.clipboard.writeText(user.value.uid);
+    await navigator.clipboard.writeText(userStore.user.uid);
     isCopied.value = true;
     setTimeout(() => {
       isCopied.value = false;
@@ -168,25 +145,27 @@ const copyUserId = async () => {
 };
 
 const handleUpdateDisplayName = async () => {
+  if (!userStore.user) return;
   displayNameError.value = "";
   displayNameSuccess.value = "";
   displayNameLoading.value = true;
 
   try {
-    if (!user.value) {
-      throw new Error("Пользователь не авторизован");
-    }
-
-    await updateProfile(user.value, {
+    await updateProfile(userStore.user, {
       displayName: newDisplayName.value,
     });
 
-    const userRef = doc(db, "users", user.value.uid);
+    const userRef = doc(db, "users", userStore.user.uid);
     await updateDoc(userRef, {
       displayName: newDisplayName.value,
     });
 
+    userStore.updateUser({ displayName: newDisplayName.value });
+
     displayNameSuccess.value = "Имя успешно обновлено!";
+    setTimeout(() => {
+      displayNameSuccess.value = "";
+    }, 2000);
   } catch (err: any) {
     if (err.code === "permission-denied" || err.message.includes("Missing or insufficient permissions")) {
       displayNameError.value = "Ошибка доступа к базе данных. Проверьте правила безопасности Firestore.";
@@ -199,36 +178,49 @@ const handleUpdateDisplayName = async () => {
 };
 
 const handleUpdatePassword = async () => {
+  if (!userStore.user || !userStore.user.email) return;
   passwordError.value = "";
   passwordSuccess.value = "";
+  passwordErrorFields.value = [];
   passwordLoading.value = true;
 
   try {
-    if (!user.value || !user.value.email) {
-      throw new Error("Пользователь не авторизован");
+    const currentPassword = passwordFormValues.value.currentPassword;
+    const newPassword = passwordFormValues.value.newPassword;
+    const confirmPassword = passwordFormValues.value.confirmPassword;
+
+    if (newPassword !== confirmPassword) {
+      passwordErrorFields.value = ["newPassword", "confirmPassword"];
+      passwordError.value = "Пароли не совпадают";
+      return;
     }
 
-    if (newPassword.value !== confirmPassword.value) {
-      throw new Error("Пароли не совпадают");
+    if (newPassword.length < 6) {
+      passwordErrorFields.value = ["newPassword"];
+      passwordError.value = "Пароль должен содержать минимум 6 символов";
+      return;
     }
 
-    if (newPassword.value.length < 6) {
-      throw new Error("Пароль должен содержать минимум 6 символов");
-    }
+    const credential = EmailAuthProvider.credential(userStore.user.email, currentPassword);
+    await reauthenticateWithCredential(userStore.user, credential);
 
-    const credential = EmailAuthProvider.credential(user.value.email, currentPassword.value);
-    await reauthenticateWithCredential(user.value, credential);
-
-    await updatePassword(user.value, newPassword.value);
+    await updatePassword(userStore.user, newPassword);
 
     passwordSuccess.value = "Пароль успешно изменен!";
-    currentPassword.value = "";
-    newPassword.value = "";
-    confirmPassword.value = "";
+    passwordFormValues.value = {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    };
+    setTimeout(() => {
+      passwordSuccess.value = "";
+    }, 2000);
   } catch (err: any) {
-    if (err.code === "auth/wrong-password") {
+    if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+      passwordErrorFields.value = ["currentPassword"];
       passwordError.value = "Неверный текущий пароль";
     } else if (err.code === "auth/weak-password") {
+      passwordErrorFields.value = ["newPassword"];
       passwordError.value = "Пароль слишком слабый";
     } else if (err.code === "auth/requires-recent-login") {
       passwordError.value = "Для изменения пароля необходимо войти заново";
@@ -241,192 +233,63 @@ const handleUpdatePassword = async () => {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .profile {
   min-height: 100vh;
-  background: #f5f5f5;
-}
+  color: var(--palette-fg);
 
-.profile-header {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 16px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
+  &__card {
+    background: var(--palette-bg-secondary);
+    border-radius: 12px;
+  }
 
-.header-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-}
+  &__avatar {
+    width: 66px;
+    height: 66px;
+    font-size: 36px;
+    color: var(--palette-white);
+    background: var(--palette-primary);
+    border-radius: 50%;
+  }
 
-.btn-back {
-  padding: 8px 16px;
-  background: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s;
-  justify-self: start;
-}
+  &__name {
+    font-size: 24px;
+    font-weight: 700;
+  }
 
-.btn-back:hover {
-  background: #e0e0e0;
-}
+  &__email {
+    color: var(--palette-gray);
+    font-size: 14px;
+  }
 
-.profile-header h1 {
-  margin: 0;
-  font-size: 24px;
-  color: #333;
-  text-align: center;
-}
+  &__id-label {
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--palette-gray);
+  }
 
-.profile-main {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 24px;
-}
+  &__user-id-container {
+    background-color: var(--palette-bg);
+    border-radius: 12px;
+    box-shadow: inset 0 4px 5px var(--inner-shadow-color);
+    cursor: pointer;
 
-.profile-card {
-  background: white;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
+    &:hover {
+      box-shadow: inset 0 2px 5px var(--palette-primary);
+    }
+  }
 
-.profile-info {
-  text-align: center;
-  margin-bottom: 40px;
-  padding-bottom: 40px;
-  border-bottom: 1px solid #e0e0e0;
-}
+  &__id {
+    color: var(--palette-fg-secondary);
+  }
 
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  font-weight: bold;
-  margin: 0 auto 16px;
-}
-
-.profile-info h2 {
-  margin: 0 0 8px 0;
-  font-size: 28px;
-  color: #333;
-}
-
-.email {
-  margin: 0 0 20px 0;
-  color: #666;
-  font-size: 16px;
-}
-
-.user-id-section {
-  margin-top: 20px;
-}
-
-.user-id-section label {
-  display: block;
-  font-size: 12px;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.user-id-container {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-}
-
-.user-id {
-  background: #f5f5f5;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #333;
-  font-family: monospace;
-  word-break: break-all;
-  flex: 1;
-  max-width: 400px;
-}
-
-.btn-copy {
-  padding: 8px 16px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.3s;
-  white-space: nowrap;
-}
-
-.btn-copy:hover {
-  background: #5568d3;
-}
-
-.btn-copy.copied {
-  background: #48bb78;
-}
-
-.form-section {
-  margin-bottom: 40px;
-}
-
-.form-section:last-child {
-  margin-bottom: 0;
-}
-
-.form-section h3 {
-  margin: 0 0 20px 0;
-  font-size: 20px;
-  color: #333;
-}
-
-.profile-form {
-  max-width: 500px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #667eea;
+  &__form-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  &__form-button {
+    align-self: flex-end;
+  }
 }
 
 .error-message {
@@ -434,7 +297,6 @@ const handleUpdatePassword = async () => {
   color: #c33;
   padding: 12px;
   border-radius: 6px;
-  margin-bottom: 16px;
   font-size: 14px;
 }
 
@@ -443,31 +305,6 @@ const handleUpdatePassword = async () => {
   color: #3a3;
   padding: 12px;
   border-radius: 6px;
-  margin-bottom: 16px;
   font-size: 14px;
-}
-
-.btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #667eea;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #5568d3;
 }
 </style>

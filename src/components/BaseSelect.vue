@@ -14,7 +14,7 @@
       >
         <option v-for="option in options" :key="option.value" :value="option.value">{{ option.text }}</option>
       </select>
-      <component :is="modelValue ? X : ChevronDown" class="base-select__icon" :size="16" />
+      <component :is="modelValue && clearable ? X : ChevronDown" class="base-select__icon" :size="16" />
     </label>
   </div>
 </template>
@@ -29,6 +29,7 @@ defineProps({
   label: { type: String, default: "" },
   required: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+  clearable: { type: Boolean, default: false },
   modelValue: { type: String },
 });
 
@@ -85,6 +86,7 @@ const onInput = (event: Event) => {
     right: 12px;
     bottom: 8px;
     cursor: pointer;
+    pointer-events: none;
   }
 }
 </style>

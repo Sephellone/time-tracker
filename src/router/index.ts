@@ -10,6 +10,7 @@ import { signOut } from "firebase/auth";
 import PageDashboard from '@/views/PageDashboard/PageDashboard.vue'
 import PageProjects from "@/views/PageProjects/PageProjects.vue";
 import PageEntries from "@/views/PageEntries/PageEntries.vue";
+import PageStatistics from "@/views/PageStatistics/PageStatistics.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,10 +52,21 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: "/statistics",
+      name: "statistics",
+      component: PageStatistics,
+      meta: { requiresAuth: true },
+    },
+    {
       path: "/logout",
       name: "logout",
       component: PageLogout,
       meta: { requiresAuth: true },
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "notFound",
+      redirect: { name: "home" },
     }
   ],
 });

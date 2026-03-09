@@ -8,6 +8,19 @@ export const formatDuration = (seconds: number) => {
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
+export const formatDurationString = (seconds: number, showSeconds: boolean = false) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  const hoursString = hours > 0 ? `${hours}ч ` : "";
+  const minutesString = minutes > 0 ? `${minutes}м ` : "";
+  const secondsString = showSeconds && secs > 0 || (minutes === 0 && hours === 0)? `${secs}с` : "";
+
+
+  return `${hoursString}${minutesString}${secondsString}`;
+}
+
 export const formatDate = (
   timestamp: Timestamp | Date | string | null | undefined,
   options?: Intl.DateTimeFormatOptions,

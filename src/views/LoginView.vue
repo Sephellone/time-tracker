@@ -1,34 +1,31 @@
 <template>
-  <div class="login-container">
+  <base-page class="login-container">
     <div class="login-card">
       <h1>{{ isLogin ? "Вход" : "Регистрация" }}</h1>
       <p class="subtitle">Трекер времени</p>
 
-      <form @submit.prevent="handleEmailAuth" class="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" required placeholder="your@email.com" />
-        </div>
+      <base-form
+        class="login-form d-flex __column gap-4"
+        :fields="formFields"
+        :values="formValues"
+        :error-fields="errorFields"
+        @input="onFormInput"
+        @submit="handleEmailAuth"
+      />
 
-        <div class="form-group">
-          <label for="password">Пароль</label>
-          <input id="password" v-model="password" type="password" required placeholder="••••••••" minlength="6" />
-        </div>
+      <div v-if="error" class="error-message">
+        {{ error }}
+      </div>
 
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-
-        <button type="submit" class="btn btn-primary" :disabled="loading">
-          {{ loading ? "Загрузка..." : isLogin ? "Войти" : "Зарегистрироваться" }}
-        </button>
-      </form>
+      <base-button class="login-form__submit mt-5" full-width :loading="loading" @click="handleEmailAuth">
+        {{ isLogin ? "Войти" : "Зарегистрироваться" }}
+      </base-button>
 
       <div class="divider">
         <span>или</span>
       </div>
 
-      <button @click="handleGoogleAuth" class="btn btn-google" :disabled="loading">
+      <base-button secondary class="btn btn-google" :disabled="loading" @click="handleGoogleAuth">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
@@ -48,7 +45,7 @@
           />
         </svg>
         Войти через Google
-      </button>
+      </base-button>
 
       <div class="toggle-mode">
         <span>{{ isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?" }}</span>
@@ -57,11 +54,11 @@
         </button>
       </div>
     </div>
-  </div>
+  </base-page>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   signInWithEmailAndPassword,
@@ -72,13 +69,44 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/firebaseConfig";
+import BasePage from "@/components/BasePage.vue";
+import BaseForm from "@/components/BaseForm.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import type { FormField, FormValues } from "@/types";
 
 const router = useRouter();
-const email = ref("");
-const password = ref("");
 const isLogin = ref(true);
 const error = ref("");
 const loading = ref(false);
+
+const formValues = ref<FormValues>({
+  email: "",
+  password: "",
+});
+
+const formFields = computed<FormField[]>(() => [
+  {
+    name: "email",
+    label: "Email",
+    type: "email",
+    required: true,
+    placeholder: "your@email.com",
+  },
+  {
+    name: "password",
+    label: "Пароль",
+    type: "password",
+    required: true,
+    placeholder: "••••••••",
+  },
+]);
+
+const errorFields = ref<string[]>([]);
+
+const onFormInput = (values: FormValues) => {
+  formValues.value = values;
+  errorFields.value = [];
+};
 
 const createUserDocument = async (user: User) => {
   const userRef = doc(db, "users", user.uid);
@@ -96,28 +124,41 @@ const createUserDocument = async (user: User) => {
 
 const handleEmailAuth = async () => {
   error.value = "";
+  errorFields.value = [];
   loading.value = true;
 
   try {
+    const email = formValues.value.email as string;
+    const password = formValues.value.password as string;
+
     let userCredential;
     if (isLogin.value) {
-      userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+      userCredential = await signInWithEmailAndPassword(auth, email, password);
       await createUserDocument(userCredential.user);
     } else {
-      userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+      userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await createUserDocument(userCredential.user);
     }
     router.push("/dashboard");
   } catch (err: any) {
-    if (err.code === 'permission-denied' || err.message.includes('Missing or insufficient permissions')) {
-      error.value = "Ошибка доступа к базе данных. Пожалуйста, настройте правила безопасности Firestore. Аккаунт создан, попробуйте войти.";
-    } else if (err.code === 'auth/email-already-in-use') {
+    if (err.code === "permission-denied" || err.message.includes("Missing or insufficient permissions")) {
+      error.value =
+        "Ошибка доступа к базе данных. Пожалуйста, настройте правила безопасности Firestore. Аккаунт создан, попробуйте войти.";
+    } else if (err.code === "auth/email-already-in-use") {
+      errorFields.value = ["email"];
       error.value = "Этот email уже используется. Попробуйте войти.";
-    } else if (err.code === 'auth/weak-password') {
+    } else if (err.code === "auth/weak-password") {
+      errorFields.value = ["password"];
       error.value = "Пароль слишком слабый. Используйте минимум 6 символов.";
-    } else if (err.code === 'auth/invalid-email') {
+    } else if (err.code === "auth/invalid-email") {
+      errorFields.value = ["email"];
       error.value = "Неверный формат email.";
-    } else if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+    } else if (
+      err.code === "auth/user-not-found" ||
+      err.code === "auth/wrong-password" ||
+      err.code === "auth/invalid-credential"
+    ) {
+      errorFields.value = ["email", "password"];
       error.value = "Неверный email или пароль.";
     } else {
       error.value = err.message;
@@ -137,11 +178,12 @@ const handleGoogleAuth = async () => {
     await createUserDocument(userCredential.user);
     router.push("/dashboard");
   } catch (err: any) {
-    if (err.code === 'permission-denied' || err.message.includes('Missing or insufficient permissions')) {
-      error.value = "Ошибка доступа к базе данных. Пожалуйста, настройте правила безопасности Firestore. Аккаунт создан, попробуйте войти.";
-    } else if (err.code === 'auth/popup-closed-by-user') {
+    if (err.code === "permission-denied" || err.message.includes("Missing or insufficient permissions")) {
+      error.value =
+        "Ошибка доступа к базе данных. Пожалуйста, настройте правила безопасности Firestore. Аккаунт создан, попробуйте войти.";
+    } else if (err.code === "auth/popup-closed-by-user") {
       error.value = "Вход через Google отменен.";
-    } else if (err.code === 'auth/cancelled-popup-request') {
+    } else if (err.code === "auth/cancelled-popup-request") {
       return;
     } else {
       error.value = err.message;
@@ -163,7 +205,6 @@ const toggleMode = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
 
@@ -191,34 +232,9 @@ h1 {
 }
 
 .login-form {
-  margin-bottom: 24px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #667eea;
+  &__submit {
+    margin-top: 8px;
+  }
 }
 
 .error-message {
