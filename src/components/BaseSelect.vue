@@ -66,6 +66,7 @@ const onInput = (event: Event) => {
     border-radius: 12px;
     background-color: var(--palette-bg-secondary);
     box-shadow: inset 0 2px 4px var(--shadow-color);
+    color: var(--palette-fg);
     cursor: pointer;
     outline: none;
     border: none;

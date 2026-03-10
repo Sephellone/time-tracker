@@ -5,8 +5,9 @@ import LoginView from "@/views/LoginView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import StoryBook from "@/views/StoryBook.vue";
 import PageLogout from "@/views/PageLogout.vue";
-import { auth } from "@/firebaseConfig.ts";
+import { auth, db } from "@/firebaseConfig.ts";
 import { signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import PageDashboard from '@/views/PageDashboard/PageDashboard.vue'
 import PageProjects from "@/views/PageProjects/PageProjects.vue";
 import PageEntries from "@/views/PageEntries/PageEntries.vue";
@@ -76,6 +77,19 @@ router.beforeEach(async (to) => {
 
   if (!userStore.user) {
     const user = await getCurrentUser();
+    
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      
+      if (userDoc.exists()) {
+        const firestoreData = userDoc.data();
+        Object.assign(user, {
+          displayName: firestoreData.displayName || user.displayName
+        });
+      }
+    }
+    
     userStore.setUser(user);
   }
 

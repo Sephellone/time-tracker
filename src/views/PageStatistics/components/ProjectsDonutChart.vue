@@ -13,6 +13,7 @@ import { ref, onMounted, watch, computed } from "vue";
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController } from "chart.js";
 import type { ProjectStats } from "../utils/dataFetchers";
 import { formatDurationString } from "@/lib/time.ts";
+import { useDarkMode } from "@/stores/darkMode.ts";
 
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController);
 
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
+const darkMode = useDarkMode();
 
 const hasData = computed(() => {
   return props.projects.some((p) => p.totalDuration > 0);
@@ -45,6 +47,10 @@ function createChart() {
   const labels = projectsWithTime.value.map((p) => p.name);
   const colors = projectsWithTime.value.map((p) => p.color);
 
+  const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--palette-fg')
+    .trim();
+
   chartInstance = new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -64,7 +70,7 @@ function createChart() {
         legend: {
           position: "bottom",
           labels: {
-            color: "#e0e0e0",
+            color: textColor,
             padding: 12,
             font: {
               size: 12,
@@ -79,6 +85,7 @@ function createChart() {
                   return {
                     text: `${label}: ${timeStr}`,
                     fillStyle: (data.datasets[0]!.backgroundColor as string[])[i],
+                    fontColor: textColor,
                     hidden: false,
                     index: i,
                   };
@@ -111,6 +118,13 @@ watch(
     createChart();
   },
   { deep: true },
+);
+
+watch(
+  () => darkMode.isDark,
+  () => {
+    createChart();
+  },
 );
 </script>
 

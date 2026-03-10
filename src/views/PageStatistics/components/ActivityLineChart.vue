@@ -26,6 +26,7 @@ import type { TimeEntry } from "@/types";
 import type { ProjectStats } from "../utils/dataFetchers";
 import { groupEntriesByDateAndProject } from "../utils/chartHelpers";
 import { formatDurationString } from "@/lib/time.ts";
+import { useDarkMode } from "@/stores/darkMode.ts";
 
 Chart.register(
   LineElement,
@@ -46,6 +47,7 @@ const props = defineProps<{
 
 const chartCanvas = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
+const darkMode = useDarkMode();
 
 const hasData = computed(() => {
   return props.entries.length > 0;
@@ -73,6 +75,13 @@ function createChart() {
     props.periodDays
   );
 
+  const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--palette-fg')
+    .trim();
+  const grayColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--palette-gray')
+    .trim();
+
   chartInstance = new Chart(ctx, {
     type: "line",
     data: {
@@ -89,26 +98,26 @@ function createChart() {
       scales: {
         x: {
           ticks: {
-            color: "#999",
+            color: grayColor,
             maxRotation: 45,
             minRotation: 0,
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)",
+            color: grayColor + '20',
           },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: "#999",
+            color: grayColor,
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.05)",
+            color: grayColor + '20',
           },
           title: {
             display: true,
             text: "Время, ч",
-            color: "#999",
+            color: grayColor,
           },
         },
       },
@@ -116,7 +125,7 @@ function createChart() {
         legend: {
           position: "top",
           labels: {
-            color: "#333",
+            color: textColor,
             padding: 12,
             usePointStyle: true,
             font: {
@@ -147,6 +156,13 @@ watch(
     createChart();
   },
   { deep: true }
+);
+
+watch(
+  () => darkMode.isDark,
+  () => {
+    createChart();
+  },
 );
 </script>
 

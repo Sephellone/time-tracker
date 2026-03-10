@@ -1,8 +1,11 @@
 <template>
   <div class="base-input">
-    <label>
-      <span v-if="!!label" class="base-input__label">{{ label }} <span v-if="required" class="base-input__required">*</span></span>
+    <label :for="`id_${name}`" v-if="!!label" class="base-input__label">
+      {{ label }} <span v-if="required" class="base-input__required">*</span>
+    </label>
+    <div class="base-input__wrapper d-flex __align-center gap-1 px-3 py-1">
       <input
+        :id="`id_${name}`"
         class="base-input__input comforta"
         :autocomplete="autocomplete"
         :name="name"
@@ -12,7 +15,10 @@
         :disabled="disabled"
         @input="onInput"
       />
-    </label>
+      <span class="base-input__append">
+        <slot name="append"></slot>
+      </span>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -51,24 +57,31 @@ const onInput = (event: Event) => {
     color: var(--palette-primary);
   }
 
-  &__input {
-    display: flex;
-    width: 100%;
-    padding: 8px 12px;
-    font-size: 14px;
+  &__wrapper {
+    position: relative;
     border-radius: 12px;
     background-color: var(--palette-bg-secondary);
     box-shadow: inset 0 2px 4px var(--shadow-color);
+    overflow: hidden;
+
+    &:focus-within {
+      outline: 1px solid var(--palette-primary);
+    }
+  }
+
+  &__input {
+    display: flex;
+    width: 100%;
+    padding: 4px 0;
+    font-size: 14px;
     cursor: text;
     outline: none;
     border: none;
+    background: transparent;
+    color: var(--palette-fg);
 
     &::placeholder {
       color: var(--palette-gray);
-    }
-
-    &:focus {
-      outline: 1px solid var(--palette-primary);
     }
   }
 }

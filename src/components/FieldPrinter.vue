@@ -8,6 +8,7 @@ import BaseTextarea from "@/components/BaseTextarea.vue";
 import BaseInput from "@/components/BaseInput.vue";
 import BaseSelect from "@/components/BaseSelect.vue";
 import ColorSelect from "@/components/ColorSelect.vue";
+import InputPassword from "@/components/InputPassword.vue";
 
 interface Props {
   field: FormField;
@@ -26,14 +27,18 @@ const component = computed(() => {
       return BaseSelect;
     case "colorSelect":
       return ColorSelect;
+    case "password":
+      return InputPassword;
     default:
       return BaseInput;
   }
 });
 
 const inputProps = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, ...fieldProps } = props.field;
   return {
-    ...props.field,
+    ...fieldProps,
     modelValue: props.value,
   };
 });

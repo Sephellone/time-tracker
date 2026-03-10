@@ -10,6 +10,7 @@
       __accent: accent,
       __positive: positive,
       __loading: loading,
+      __disabled: disabled,
     }"
     :style="`color: ${iconColor}`"
     @click="$emit('click')"
@@ -35,6 +36,7 @@ const props = defineProps({
   secondary: { type: Boolean },
   accent: { type: Boolean },
   positive: { type: Boolean },
+  disabled: { type: Boolean },
 });
 
 defineEmits(["click"]);
@@ -99,6 +101,10 @@ const iconColor = computed(() =>
     color: var(--palette-white);
   }
   &.__loading {
+    pointer-events: none;
+  }
+  &.__disabled {
+    background-color: var(--palette-gray);
     pointer-events: none;
   }
 }

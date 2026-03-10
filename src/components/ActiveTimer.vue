@@ -60,17 +60,6 @@ const getActiveTimer = async () => {
   }
 };
 
-// const handleCreateTimeEntry = async () => {
-//   if (!userStore.user) return;
-//   try {
-//     saving.value = true;
-//   } catch (error) {
-//     console.error("Error creating time entry:", error);
-//   } finally {
-//     saving.value = false;
-//   }
-// };
-
 const startTimer = async ({projectId, cb}: {projectId: string; cb?: () => void}) => {
   if (!userStore.user) return;
 
