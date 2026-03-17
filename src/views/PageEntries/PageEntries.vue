@@ -2,7 +2,7 @@
   <base-page class="entries">
     <page-title class="pr-4 pl-2 pt-4 mb-6" title="Архив записей">
       <template #actions>
-        <icon-button class="entries__add">
+        <icon-button class="entries__add" @click="onCreateClick">
           <circle-plus />
         </icon-button>
       </template>
@@ -59,6 +59,10 @@ const onCloseEditModal = () => {
 
 const onOpenEditModal = (entry: TimeEntry) => {
   entryToEdit.value = entry;
+  showEditModal.value = true;
+};
+
+const onCreateClick = () => {
   showEditModal.value = true;
 };
 

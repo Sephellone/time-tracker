@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { getCurrentUser } from "vuefire";
 import { useUserStore } from "@/stores/user";
 import LoginView from "@/views/LoginView.vue";
+import PasswordResetView from "@/views/PasswordResetView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import StoryBook from "@/views/StoryBook.vue";
 import PageLogout from "@/views/PageLogout.vue";
@@ -26,6 +27,12 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: LoginView,
+      meta: { requiresGuest: true },
+    },
+    {
+      path: "/password-reset",
+      name: "passwordReset",
+      component: PasswordResetView,
       meta: { requiresGuest: true },
     },
     {

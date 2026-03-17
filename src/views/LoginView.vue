@@ -13,6 +13,10 @@
         @submit="handleEmailAuth"
       />
 
+      <div v-if="isLogin" class="forgot-password">
+        <button type="button" @click="router.push('/password-reset')" class="link-button">Забыли пароль?</button>
+      </div>
+
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
@@ -209,7 +213,7 @@ const toggleMode = () => {
 }
 
 .login-card {
-  background: white;
+  background: var(--palette-bg-secondary);
   border-radius: 12px;
   padding: 40px;
   width: 100%;
@@ -220,13 +224,13 @@ const toggleMode = () => {
 h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: #333;
+  color: var(--palette-fg);
   text-align: center;
 }
 
 .subtitle {
   margin: 0 0 32px 0;
-  color: #666;
+  color: var(--palette-fg);
   text-align: center;
   font-size: 14px;
 }
@@ -238,8 +242,8 @@ h1 {
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
+  background: var(--palette-bg);
+  color: var(--palette-negative);
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 16px;
@@ -266,15 +270,6 @@ h1 {
   cursor: not-allowed;
 }
 
-.btn-primary {
-  background: #667eea;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #5568d3;
-}
-
 .btn-google {
   background: white;
   color: #333;
@@ -298,14 +293,20 @@ h1 {
   top: 50%;
   width: 100%;
   height: 1px;
-  background: #ddd;
+  background: var(--palette-gray);
 }
 
 .divider span {
   position: relative;
-  background: white;
+  background: var(--palette-bg-secondary);
   padding: 0 16px;
-  color: #999;
+  color: var(--palette-fg);
+  font-size: 14px;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: 8px;
   font-size: 14px;
 }
 
@@ -313,13 +314,13 @@ h1 {
   text-align: center;
   margin-top: 24px;
   font-size: 14px;
-  color: #666;
+  color: var(--palette-gray);
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #667eea;
+  color: var(--palette-primary);
   cursor: pointer;
   font-weight: 500;
   padding: 0;

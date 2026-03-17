@@ -9,6 +9,8 @@ import BaseInput from "@/components/BaseInput.vue";
 import BaseSelect from "@/components/BaseSelect.vue";
 import ColorSelect from "@/components/ColorSelect.vue";
 import InputPassword from "@/components/InputPassword.vue";
+import InputDate from "@/components/InputDate.vue";
+import InputTime from "@/components/InputTime.vue";
 
 interface Props {
   field: FormField;
@@ -29,14 +31,17 @@ const component = computed(() => {
       return ColorSelect;
     case "password":
       return InputPassword;
+    case "date":
+      return InputDate;
+    case "time":
+      return InputTime;
     default:
       return BaseInput;
   }
 });
 
 const inputProps = computed(() => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, ...fieldProps } = props.field;
+  const { type: _type, ...fieldProps } = props.field;
   return {
     ...fieldProps,
     modelValue: props.value,

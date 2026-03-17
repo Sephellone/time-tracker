@@ -14,7 +14,7 @@
       @input="onInput"
     >
     </base-form>
-    <div class="span-2 d-flex __align-center __justify-end gap-3">
+    <div class="span-2 d-flex __align-center __justify-end gap-3 mt-5">
       <base-button secondary :disabled="processing" @click="onCloseModal">Отмена</base-button>
       <base-button :loading="processing" @click="project ? onUpdateProject() : onCreateProject()">
         {{ project ? "Сохранить" : "Создать" }}
